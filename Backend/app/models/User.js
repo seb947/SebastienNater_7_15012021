@@ -1,0 +1,29 @@
+module.exports = (sequelize, Sequelize) => {
+    const User = sequelize.define("user", {
+      email: {
+        type: Sequelize.STRING,
+        required: true
+      },
+      password: {
+        type: Sequelize.STRING,
+        required: true
+      },
+      firstName: {
+        type: Sequelize.STRING,
+        required: true
+      },
+      lastName: {
+        type: Sequelize.STRING,
+        required: true
+      },
+      profilePic: {
+        type: Sequelize.STRING,
+      },
+      isAdmin: {
+        type: Sequelize.BOOLEAN,
+        default: false
+      }
+    });
+  
+    return User;
+  };
