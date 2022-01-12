@@ -29,5 +29,6 @@ app.use(express.urlencoded({ extended: true }));
 app.use('/images', express.static(path.join(__dirname, 'images')));
 db.sequelize.sync();
 require("./app/routes/messageRoute")(app);
+require("./app/routes/userRoute")(app);
 
 module.exports = app;

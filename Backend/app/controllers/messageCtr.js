@@ -17,8 +17,7 @@ exports.create = (req, res) => {
       author: req.body.author,
       title: req.body.title,
       text: req.body.text,
-      likes: req.body.likes,
-      dislikes: req.body.dislikes
+      likeList:JSON.stringify([])
     };
     // Save message in the database
     Message.create(message)
@@ -36,9 +35,9 @@ exports.create = (req, res) => {
 // Retrieve all messages from the database.
 exports.findAll = (req, res) => {
     const title = req.query.title;
-    var condition = title ? { title: { [Op.like]: `%${title}%` } } : null;
+    //var condition = title ? { title: { [Op.like]: `%${title}%` } } : null;
   
-    Message.findAll({ where: condition })
+    Message.findAll(/*{ where: condition }*/)
       .then(data => {
         res.send(data);
       })
@@ -115,13 +114,13 @@ exports.delete = (req, res) => {
         }
       })
       .catch(err => {
-        res.status(500).send({
+        err.status(500).send({
           message: "Could not delete message with id=" + id
         });
       });
   };
 
-// Delete all Tutorials from the database.
+/* Delete all messages from the database.
 exports.deleteAll = (req, res) => {
     Message.destroy({
       where: {},
@@ -150,4 +149,33 @@ exports.findAllPublished = (req, res) => {
             err.message || "Some error occurred while retrieving messages."
         });
       });
-  };
+  };*/
+
+  exports.isLiked = async(req, res, next) => {
+    const userId = req.body.id;
+    let messageId = req.params.id;
+    let option = req.body.likes;
+    let response = {code:200,message:"une erreur survenue ressaye plus tard"}
+    post = await Message.findOne({ id: messageId })
+    if(!post){
+      response['code']=500
+      res.status(response['code']).json({message:response['message']})
+    }
+    // post exit
+    let usersLikes =JSON.parse( post.likeList)
+    switch (parseInt(option))
+     {
+      case 0: 
+        usersLikes =  usersLikes.filter(id=>id !=userId)
+        response['message']="user a supprimer son like"
+        break;
+      
+      case 1: 
+        response['message']="user like"
+        usersLikes.push(userId)
+        break;      
+    }
+    res.status(response['code']).json({message:response['message']})
+
+  }
+

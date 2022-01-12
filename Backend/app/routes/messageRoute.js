@@ -1,21 +1,14 @@
 module.exports = app => {
     const message = require("../controllers/messageCtr");
+    const auth = require('../middleware/auth.js');
     var router = require("express").Router();
   
-    // Create a new message
-    router.post("/", message.create);
-  
-    // Retrieve all messages
-    router.get("/", message.findAll);
-  
-    // Retrieve a single message with id
-    router.get("/:id", message.findOne);
-  
-    // Update a message with id
-    router.put("/:id", message.update);
-  
-    // Delete a message with id
-    router.delete("/:id", message.delete);
+    router.post("/", auth, message.create);
+    router.get("/", auth, message.findAll);
+    router.get("/:id", auth, message.findOne);
+    router.put("/:id", auth, message.update);
+    router.delete("/:id", auth, message.delete);
+    router.post("/:id/like", auth, message.isLiked);
   
     // Add or remove like from a message
     //router.post('/:id/like', message.isLiked);

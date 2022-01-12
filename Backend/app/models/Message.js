@@ -12,23 +12,16 @@ module.exports = (sequelize, Sequelize) => {
         type: Sequelize.STRING,
         required: true
       },
-      likes: {
-        type: Sequelize.INTEGER,
-        defaultValue: 0
-      },
-      dislikes: {
-        type: Sequelize.INTEGER,
-        defaultValue: 0
-      },
+      // ajout picture , pour image message
       likeList: {
-        type: Sequelize.TEXT
+        type: Sequelize.TEXT,
       },
-      dislikeList: {
-        type: Sequelize.TEXT
-      },
-      answersList: {
-        type: Sequelize.TEXT
-      },
+      // answersList: {
+      //   type: Sequelize.TEXT,
+      //   defaultValue: ""
+      // },
+      // model comment , et tu lie message et comment(message_id,content,user_id)
+      // soft delete
       signaled: {
         type: Sequelize.BOOLEAN,
         defaultValue: false
