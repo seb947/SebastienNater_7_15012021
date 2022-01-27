@@ -1,20 +1,20 @@
-module.exports = (sequelize, Sequelize) => {
+module.exports = (sequelize, DataTypes) => {
     const Message = sequelize.define("message", {
       author: {
-        type: Sequelize.STRING,
+        type: DataTypes.INTEGER,
         required: true
       },
       title: {
-        type: Sequelize.STRING,
+        type: DataTypes.STRING,
         required: true
       },
       text: {
-        type: Sequelize.STRING,
+        type: DataTypes.STRING,
         required: true
       },
       // ajout picture , pour image message
       likeList: {
-        type: Sequelize.TEXT,
+        type: DataTypes.TEXT,
       },
       // answersList: {
       //   type: Sequelize.TEXT,
@@ -23,14 +23,18 @@ module.exports = (sequelize, Sequelize) => {
       // model comment , et tu lie message et comment(message_id,content,user_id)
       // soft delete
       signaled: {
-        type: Sequelize.BOOLEAN,
+        type: DataTypes.BOOLEAN,
         defaultValue: false
       },
       isDeleted: {
-        type: Sequelize.DATE,
+        type: DataTypes.DATE,
         default: null
       }
     });
+
+     Message.associate = models =>{
+       Message.belongsTo(models.users)
+     }
   
     return Message;
   };

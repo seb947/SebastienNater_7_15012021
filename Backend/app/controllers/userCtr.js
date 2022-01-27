@@ -53,15 +53,6 @@ exports.login = (req, res) => {
         }else{
             bcryptjs.compare(req.body.password, user.password, function(err, result){
                 if(result){
-                    /*const token = jwt.sign({
-                        email: user.email,
-                        userId: user.id
-                    }, 'secret', function(err, token){
-                        res.status(200).json({
-                            message: "Authentication successfull!",
-                            token: token
-                        })
-                    })*/
                     res.status(200).json({
                       email: user.email,
                       userId: user.id,
@@ -106,7 +97,7 @@ exports.delete = (req, res) => {
       });
   };
 
-/*//Modify user informations
+//Modify user informations
 exports.update = (req, res) => {
     const id = req.params.id;
   
@@ -129,4 +120,4 @@ exports.update = (req, res) => {
           message: "Error updating user with id=" + id
         });
       });
-  };*/
+  };

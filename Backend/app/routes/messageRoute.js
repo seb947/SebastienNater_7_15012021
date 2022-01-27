@@ -9,15 +9,6 @@ module.exports = app => {
     router.put("/:id", auth, message.update);
     router.delete("/:id", auth, message.delete);
     router.post("/:id/like", auth, message.isLiked);
-  
-    // Add or remove like from a message
-    //router.post('/:id/like', message.isLiked);
 
-    // Delete all messages
-    //router.delete("/", message.deleteAll);
-
-     // Retrieve all published messages
-    //router.get("/published", message.findAllPublished);
-  
     app.use('/api/message', router);
   };

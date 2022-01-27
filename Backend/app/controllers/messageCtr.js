@@ -1,4 +1,5 @@
 const db = require("../models");
+const User = require("../models/User");
 const Message = db.messages;
 const Op = db.Sequelize.Op;
 
@@ -33,20 +34,24 @@ exports.create = (req, res) => {
   };
 
 // Retrieve all messages from the database.
-exports.findAll = (req, res) => {
-    const title = req.query.title;
-    //var condition = title ? { title: { [Op.like]: `%${title}%` } } : null;
+exports.findAll = async (req, res) => {
   
-    Message.findAll(/*{ where: condition }*/)
-      .then(data => {
-        res.send(data);
-      })
-      .catch(err => {
-        res.status(500).send({
-          message:
-            err.message || "Some error occurred while retrieving message."
-        });
-      });
+  const listOfMessages =  await Message.findAll({
+      attributes:['id','author','title','text','likeList'],
+      include:[
+        {
+          model: User,
+          as:"author",
+          attributes:['email','lastName','firstName','profilePic','isAdmin']
+        }
+      ],
+      order:[
+        ['createdAt','DESC']
+      ]
+    })
+    console.log(listOfMessages);
+
+    return listOfMessages;
   };
   
 // Find a single message with an id
@@ -97,66 +102,36 @@ exports.update = (req, res) => {
 
 // Delete a message with the specified id in the request
 exports.delete = (req, res) => {
-    const id = req.params.id;
+  const id = req.params.id;
   
-    Message.destroy({
+    Message.update(req.body, {
       where: { id: id }
     })
       .then(num => {
         if (num == 1) {
           res.send({
-            message: "message was deleted successfully!"
+            message: "Message was updated successfully."
           });
         } else {
           res.send({
-            message: `Cannot delete message with id=${id}. Maybe message was not found!`
+            message: `Cannot update message with id=${id}. Maybe message was not found or req.body is empty!`
           });
         }
       })
       .catch(err => {
-        err.status(500).send({
-          message: "Could not delete message with id=" + id
+        res.status(500).send({
+          message: "Error updating message with id=" + id
         });
       });
   };
-
-/* Delete all messages from the database.
-exports.deleteAll = (req, res) => {
-    Message.destroy({
-      where: {},
-      truncate: false
-    })
-      .then(nums => {
-        res.send({ message: `${nums} Messages were deleted successfully!` });
-      })
-      .catch(err => {
-        res.status(500).send({
-          message:
-            err.message || "Some error occurred while removing all messages."
-        });
-      });
-  };
-
-// Find all published Tutorials
-exports.findAllPublished = (req, res) => {
-    Message.findAll({ where: { published: true } })
-      .then(data => {
-        res.send(data);
-      })
-      .catch(err => {
-        res.status(500).send({
-          message:
-            err.message || "Some error occurred while retrieving messages."
-        });
-      });
-  };*/
 
   exports.isLiked = async(req, res, next) => {
     const userId = req.body.id;
     let messageId = req.params.id;
     let option = req.body.likes;
-    let response = {code:200,message:"une erreur survenue ressaye plus tard"}
+    let response = {code:200,message:"an error occured, try again later"}
     post = await Message.findOne({ id: messageId })
+    console.log(post)
     if(!post){
       response['code']=500
       res.status(response['code']).json({message:response['message']})

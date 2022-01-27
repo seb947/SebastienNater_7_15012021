@@ -24,6 +24,10 @@ module.exports = (sequelize, Sequelize) => {
         defaultValue: false
       }
     });
+
+    User.associate = models => {
+      User.hasMany(models.message)
+    };
   
     return User;
   };
