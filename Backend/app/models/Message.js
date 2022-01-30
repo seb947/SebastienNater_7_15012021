@@ -1,6 +1,6 @@
 module.exports = (sequelize, DataTypes) => {
     const Message = sequelize.define("message", {
-      author: {
+      user_id: {
         type: DataTypes.INTEGER,
         required: true
       },
@@ -12,15 +12,12 @@ module.exports = (sequelize, DataTypes) => {
         type: DataTypes.STRING,
         required: true
       },
-      // ajout picture , pour image message
+      picture:{
+        type: DataTypes.STRING,
+      },
       likeList: {
         type: DataTypes.TEXT,
       },
-      // answersList: {
-      //   type: Sequelize.TEXT,
-      //   defaultValue: ""
-      // },
-      // model comment , et tu lie message et comment(message_id,content,user_id)
       // soft delete
       signaled: {
         type: DataTypes.BOOLEAN,
@@ -33,8 +30,22 @@ module.exports = (sequelize, DataTypes) => {
     });
 
      Message.associate = models =>{
-       Message.belongsTo(models.users)
+       Message.belongsTo(models.user,
+        {
+          onDelete:"cascade",
+          foreignKey:"user_id",
+          as:"author"
+        });
+      Message.hasMany(models.answer,
+        {
+          onDelete:"cascade",
+          foreignKey:"message_id",
+          as:"answers"
+        });
      }
+     
+      
+
   
     return Message;
   };

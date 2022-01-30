@@ -26,7 +26,11 @@ module.exports = (sequelize, Sequelize) => {
     });
 
     User.associate = models => {
-      User.hasMany(models.message)
+      User.hasMany(models.message,
+        {
+          onDelete: "cascade",
+          as: "message"
+        });
     };
   
     return User;

@@ -1,6 +1,6 @@
 const db = require("../models");
-const User = require("../models/User");
-const Message = db.messages;
+const User = db.user;
+const Message = db.message;
 const Op = db.Sequelize.Op;
 
 // Create and Save a new message
@@ -12,14 +12,15 @@ exports.create = (req, res) => {
       });
       return;
     }
-  
+  console.log(req.userId)
     // Create a message
     const message = {
-      author: req.body.author,
+      user_id: req.userId,
       title: req.body.title,
       text: req.body.text,
       likeList:JSON.stringify([])
     };
+  
     // Save message in the database
     Message.create(message)
       .then(data => {
@@ -35,23 +36,26 @@ exports.create = (req, res) => {
 
 // Retrieve all messages from the database.
 exports.findAll = async (req, res) => {
-  
-  const listOfMessages =  await Message.findAll({
-      attributes:['id','author','title','text','likeList'],
+  try {
+    const listOfMessages =  await Message.findAll({
+      attributes:['id','title','text','likeList'],
       include:[
         {
           model: User,
           as:"author",
-          attributes:['email','lastName','firstName','profilePic','isAdmin']
+          attributes:['id','email','lastName','firstName','profilePic','isAdmin']
         }
       ],
       order:[
         ['createdAt','DESC']
       ]
     })
-    console.log(listOfMessages);
 
-    return listOfMessages;
+    return res.json({messages:listOfMessages})
+  } catch (error) {
+    console.log(error)
+  }
+
   };
   
 // Find a single message with an id
