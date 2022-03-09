@@ -7,8 +7,8 @@ module.exports = app => {
     router.post("/signup", pwdValidator, user.signup);
     router.post("/login", user.login);
     router.post("/:id", auth, user.updatePicture);
-    router.put("/:id", auth, pwdValidator, user.updatePassword);
-    router.delete("/:id", auth, user.delete);
+    router.put("/update-password", auth, pwdValidator, user.updatePassword);
+    router.delete("/delete", auth, user.delete);
 
     app.use('/api/user', router);
 }

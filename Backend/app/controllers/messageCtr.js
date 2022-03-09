@@ -1,6 +1,7 @@
 const db = require("../models");
 const User = db.user;
 const Message = db.message;
+const Answer = db.answer;
 const Op = db.Sequelize.Op;
 
 // Create and Save a new message
@@ -12,7 +13,6 @@ exports.create = (req, res) => {
       });
       return;
     }
-  console.log(req.userId)
     // Create a message
     const message = {
       user_id: req.userId,
@@ -59,25 +59,35 @@ exports.findAll = async (req, res) => {
   };
   
 // Find a single message with an id
-exports.findOne = (req, res) => {
-    const id = req.params.id;
-  
-    Message.findByPk(id)
-      .then(data => {
-        if (data) {
-          res.send(data);
-        } else {
-          res.status(404).send({
-            message: `Cannot find message with id=${id}.`
-          });
+exports.findOne = async (req, res) => {
+  try {
+    const message =  await Message.findByPk(req.params.id, {
+      paranoid: true,
+      include:[
+        {
+          model: User,
+          as:"author",
+          attributes:['id','email','lastName','firstName','profilePic','isAdmin']
+        },
+        {
+          model: Answer,
+          as:"answers",
+          attributes: ['id', 'user_id', 'text'],
+          include:[
+            {
+              model: User,
+              as:"author",
+              attributes:['id','email','lastName','firstName','profilePic','isAdmin']
+            }
+          ]
         }
-      })
-      .catch(err => {
-        res.status(500).send({
-          message: "Error retrieving message with id=" + id
-        });
-      });
-  };
+      ]
+    })
+    return res.json({messages:message})
+  } catch (error) {
+    console.log(error)
+  }
+};
 
 // Update a message by the id in the request
 exports.update = (req, res) => {
@@ -105,56 +115,63 @@ exports.update = (req, res) => {
   };
 
 // Delete a message with the specified id in the request
-exports.delete = (req, res) => {
-  const id = req.params.id;
-  
-    Message.update(req.body, {
-      where: { id: id }
-    })
-      .then(num => {
-        if (num == 1) {
-          res.send({
-            message: "Message was updated successfully."
-          });
-        } else {
-          res.send({
-            message: `Cannot update message with id=${id}. Maybe message was not found or req.body is empty!`
-          });
-        }
-      })
-      .catch(err => {
-        res.status(500).send({
-          message: "Error updating message with id=" + id
-        });
-      });
-  };
-
-  exports.isLiked = async(req, res, next) => {
-    const userId = req.body.id;
-    let messageId = req.params.id;
-    let option = req.body.likes;
-    let response = {code:200,message:"an error occured, try again later"}
-    post = await Message.findOne({ id: messageId })
-    console.log(post)
-    if(!post){
-      response['code']=500
-      res.status(response['code']).json({message:response['message']})
-    }
-    // post exit
-    let usersLikes =JSON.parse( post.likeList)
-    switch (parseInt(option))
-     {
-      case 0: 
-        usersLikes =  usersLikes.filter(id=>id !=userId)
-        response['message']="user a supprimer son like"
-        break;
-      
-      case 1: 
-        response['message']="user like"
-        usersLikes.push(userId)
-        break;      
-    }
-    res.status(response['code']).json({message:response['message']})
-
+exports.delete = async (req, res) => {
+  let messageId = req.params.id
+  try{
+    const deletedMessage = await Message.destroy({
+      where: {
+        id: messageId
+      }
+    });
+    return res.json({messages:deletedMessage})
+  } catch (error){
+    console.log(error)
   }
+};
+
+exports.isLiked = async(req, res, next) => {
+  const userId = req.body.id;
+  let messageId = req.params.id;
+  let option = req.body.likes;
+  let response = {code:200,message:"an error occured, try again later"}
+  post = await Message.findOne({ id: messageId })
+  if(!post){
+    response['code']=500
+    res.status(response['code']).json({message:response['message']})
+  }
+  // post exit
+  let usersLikes =JSON.parse( post.likeList)
+  switch (parseInt(option))
+    {
+    case 0: 
+      usersLikes =  usersLikes.filter(id=>id !=userId)
+      response['message']="deleted like"
+      break;
+    
+    case 1: 
+      response['message']="added like"
+      usersLikes.push(userId)
+      break;      
+  }
+  res.status(response['code']).json({message:response['message']})
+
+}
+
+exports.getAnswers = async(req, res, next) => {
+  try {
+    const message =  await Message.findByPk(req.params.id, {
+      paranoid: true,
+      include:[
+        {
+          model: User,
+          as:"author",
+          attributes:['id','email','lastName','firstName','profilePic','isAdmin']
+        }
+      ]
+    })
+    return res.json({messages:message})
+  } catch (error) {
+    console.log(error)
+  }
+}
 

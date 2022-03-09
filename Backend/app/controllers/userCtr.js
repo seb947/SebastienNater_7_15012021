@@ -46,7 +46,7 @@ exports.signup = (req, res) => {
 // Login user
 exports.login = (req, res) => {
     User.findOne({where:{email:req.body.email}}).then(user => {
-        if(user === null){
+        if(user === null || req.body.password === null){
             res.status(401).json({
                 message: "Invalid Credentials!",
             })
@@ -74,7 +74,7 @@ exports.login = (req, res) => {
 
 //Delete User
 exports.delete = (req, res) => {
-    const id = req.params.id;
+    const id = req.userId;
   
     User.destroy({
       where: { id: id }
@@ -99,12 +99,10 @@ exports.delete = (req, res) => {
 
 //Modify user Picture
 exports.updatePicture = (req, res) => {
-  let picture =  `images/${req.file.filename}`;
+  let newPicture =  `images/${req.file.filename}`;
    try{
-        User.update({profilePic:picture},{
-          where: {id:req.user.id}
-        }) ; 
-        res.json({message:"picture updated", profilePic:picture}); 
+        User.update({profilePic:newPicture},{where: {id:req.userId}}) ; 
+        res.json({message:"picture updated", profilePic:newPicture}); 
       }catch(error){
         res.status(500).json({ message: "an error occured" });
     }
@@ -112,15 +110,14 @@ exports.updatePicture = (req, res) => {
 
 //Modify user Password
 exports.updatePassword = (req, res) => { 
-  const password = req.body.pwd;
-  const newPassword = req.body.newPwd;
-  const user = User.findByPk(req.user.id);
-
+  const oldPassword = req.body.oldPassword;
+  const newPassword = req.body.password;
+  const user = User.findByPk(req.userId);
   try{
-      let valid = bcryptjs.compare(password, user.password) ;
+      let valid = bcryptjs.compare(oldPassword, user.password) ;
       if (valid){
         let hash = bcryptjs.hash(newPassword, 10) ;
-        User.update({password: hash}, { where: { id: req.user.id } }) ;
+        User.update({password: hash}, { where: { id: req.userId } }) ;
         return res.json({message:"Password modified"});
       }
       res.status(400).json({ message: "Invalid password" });

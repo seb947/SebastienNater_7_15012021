@@ -1,3 +1,5 @@
+const sequelizeSoftDelete = require('sequelize-soft-delete')
+
 module.exports = (sequelize, DataTypes) => {
     const Message = sequelize.define("message", {
       user_id: {
@@ -18,21 +20,22 @@ module.exports = (sequelize, DataTypes) => {
       likeList: {
         type: DataTypes.TEXT,
       },
-      // soft delete
       signaled: {
         type: DataTypes.BOOLEAN,
         defaultValue: false
       },
       isDeleted: {
         type: DataTypes.DATE,
-        default: null
-      }
+        default: null,
+      },
+    },{
+      paranoid: true,
+      deletedAt: 'isDeleted'
     });
 
      Message.associate = models =>{
        Message.belongsTo(models.user,
         {
-          onDelete:"cascade",
           foreignKey:"user_id",
           as:"author"
         });

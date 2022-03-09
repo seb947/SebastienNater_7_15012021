@@ -12,7 +12,7 @@ module.exports = (req, res, next) => {
         .has().digits(1)                                // Must have at least 1 digits
 
         result = schema.validate(req.body.password)
-        console.log(result);                            //frontend dont show if the password validation succeeded
+        //console.log(result);                            //frontend dont show if the password validation succeeded
       if (result == false) {
         throw 'Le mot de passe ne correspond pas aux criteres';
       } else {

@@ -17,7 +17,6 @@ module.exports = (sequelize, DataTypes) => {
      Answer.associate = models =>{
        Answer.belongsTo(models.user,
         {
-        onDelete:"cascade",
         foreignKey:"user_id",
         as:"author"
         }

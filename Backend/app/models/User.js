@@ -23,7 +23,8 @@ module.exports = (sequelize, Sequelize) => {
         type: Sequelize.BOOLEAN,
         defaultValue: false
       }
-    });
+    }
+    );
 
     User.associate = models => {
       User.hasMany(models.message,
