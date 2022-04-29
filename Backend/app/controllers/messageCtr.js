@@ -57,6 +57,30 @@ exports.findAll = async (req, res) => {
   }
 
   };
+
+  exports.findAllSignaled = async (req, res) => {
+    try {
+      const listOfMessages =  await Message.findAll({
+        where:{signaled:true},
+        attributes:['id','title','text','likeList'],
+        include:[
+          {
+            model: User,
+            as:"author",
+            attributes:['id','email','lastName','firstName','profilePic','isAdmin']
+          }
+        ],
+        order:[
+          ['createdAt','DESC']
+        ]
+      })
+  
+      return res.json({messages:listOfMessages})
+    } catch (error) {
+      console.log(error)
+    }
+  
+    };
   
 // Find a single message with an id
 exports.findOne = async (req, res) => {
@@ -68,18 +92,6 @@ exports.findOne = async (req, res) => {
           model: User,
           as:"author",
           attributes:['id','email','lastName','firstName','profilePic','isAdmin']
-        },
-        {
-          model: Answer,
-          as:"answers",
-          attributes: ['id', 'user_id', 'text'],
-          include:[
-            {
-              model: User,
-              as:"author",
-              attributes:['id','email','lastName','firstName','profilePic','isAdmin']
-            }
-          ]
         }
       ]
     })
@@ -92,7 +104,9 @@ exports.findOne = async (req, res) => {
 // Update a message by the id in the request
 exports.update = (req, res) => {
     const id = req.params.id;
-  
+    if(req.body.likeList || req.body.isDeleted || req.body.signaled){
+      return res.json({message:"invalid request"});
+    };
     Message.update(req.body, {
       where: { id: id }
     })
@@ -109,7 +123,7 @@ exports.update = (req, res) => {
       })
       .catch(err => {
         res.status(500).send({
-          message: "Error updating message with id=" + id
+          message: "Error updating message with id= " + id
         });
       });
   };
@@ -154,24 +168,30 @@ exports.isLiked = async(req, res, next) => {
       break;      
   }
   res.status(response['code']).json({message:response['message']})
-
 }
 
-exports.getAnswers = async(req, res, next) => {
-  try {
-    const message =  await Message.findByPk(req.params.id, {
-      paranoid: true,
-      include:[
-        {
-          model: User,
-          as:"author",
-          attributes:['id','email','lastName','firstName','profilePic','isAdmin']
-        }
-      ]
+exports.isSignaled = async(req, res) => {
+  const id = req.params.id;
+  if(req.body.likeList || req.body.isDeleted || req.body.text){
+    return res.json({message:"invalid request"});
+  };
+  Message.update(req.body.signaled, {
+    where: { id: id }
+  })
+    .then(num => {
+      if (num == 1) {
+        res.send({
+          message: "Message was signaled."
+        });
+      } else {
+        res.send({
+          message: `Cannot signal message with id=${id}. invalid request`
+        });
+      }
     })
-    return res.json({messages:message})
-  } catch (error) {
-    console.log(error)
-  }
-}
-
+    .catch(err => {
+      res.status(500).send({
+        message: "Error signaling message with id= " + id
+      });
+    });
+};

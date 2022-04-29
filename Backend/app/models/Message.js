@@ -34,7 +34,7 @@ module.exports = (sequelize, DataTypes) => {
     });
 
      Message.associate = models =>{
-       Message.belongsTo(models.user,
+      Message.belongsTo(models.user,
         {
           foreignKey:"user_id",
           as:"author"
@@ -42,13 +42,8 @@ module.exports = (sequelize, DataTypes) => {
       Message.hasMany(models.answer,
         {
           onDelete:"cascade",
-          foreignKey:"message_id",
-          as:"answers"
+          as:"answer"
         });
      }
-     
-      
-
-  
     return Message;
   };

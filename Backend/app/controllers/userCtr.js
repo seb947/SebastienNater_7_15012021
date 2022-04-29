@@ -24,7 +24,7 @@ exports.signup = (req, res) => {
                     };
                     User.create(user)
                         .then(data => {
-                            res.send(data);
+                            res.send("user " + data.firstName + " " + data.lastName + " created");
                         })
                         .catch(err => {
                             res.status(500).send({
@@ -56,6 +56,7 @@ exports.login = (req, res) => {
                     res.status(200).json({
                       email: user.email,
                       userId: user.id,
+                      isAdmin: user.isAdmin,
                       token: jwt.sign(
                           { userId: user.id },
                           'secret',
@@ -67,7 +68,7 @@ exports.login = (req, res) => {
         }
     }).catch(err => {
         res.status(500).json({
-        message: "Something went wrong!",
+        message: "Something went wrong!" + err,
         });
     });
 };
@@ -114,8 +115,8 @@ exports.updatePassword = (req, res) => {
   const newPassword = req.body.password;
   const user = User.findByPk(req.userId);
   try{
-      let valid = bcryptjs.compare(oldPassword, user.password) ;
-      if (valid){
+      let validate = bcryptjs.compare(oldPassword, user.password) ;
+      if (validate){
         let hash = bcryptjs.hash(newPassword, 10) ;
         User.update({password: hash}, { where: { id: req.userId } }) ;
         return res.json({message:"Password modified"});

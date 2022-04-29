@@ -10,7 +10,7 @@ require('dotenv').config();
 const app = express();
 
 var corsOptions = {
-  origin: "http://localhost:8081"
+  origin: "http://localhost:8080"
 };
 
 app.use(cors(corsOptions));
@@ -30,5 +30,6 @@ app.use('/images', express.static(path.join(__dirname, 'images')));
 db.sequelize.sync();
 require("./app/routes/messageRoute")(app);
 require("./app/routes/userRoute")(app);
+require("./app/routes/answerRoute")(app);
 
 module.exports = app;

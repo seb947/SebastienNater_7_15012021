@@ -31,7 +31,12 @@ module.exports = (sequelize, Sequelize) => {
         {
           onDelete: "cascade",
           as: "message"
-        });
+        }),
+      User.hasMany(models.answer,
+        {
+          onDelete: "cascade",
+          as: "answer"
+        })
     };
   
     return User;
